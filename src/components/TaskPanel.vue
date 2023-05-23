@@ -24,12 +24,12 @@ const tasks = ref([]);
 const showModal = ref(false);
 const loadingData = ref(false);
 const loadingList = ref([]);
-const task = ref({ title: null, color: "#000000" });
+const task = ref({ title: null, color: "#00ffaa" });
 const action = ref(null);
 const filter_colors = ref([]);
 const re_render = ref(true);
 const store = useAuthUserStore();
-const showTaskForm = (taskParam = { users: [], color: "#000000" }) => {
+const showTaskForm = (taskParam = { users: [], color: "#00ffaa" }) => {
   task.value = { ...taskParam };
   action.value = taskParam.title ? "EDIT" : "CREATE";
   changeModalVisibility();
@@ -105,30 +105,6 @@ const loadFilterColors = () => {
   });
 };
 
-// const filterTaskByColor = async () => {
-//   loadingData.value = true;
-//   let position = 0;
-//   const tasksRef = collection(db, "tasks");
-//   const q = query(
-//     tasksRef,
-//     where("users", "array-contains", store.user),
-//     where("color", "in", filters_selected.value)
-//   );
-//   try {
-//     const getTasksByColor = await getDocs(q);
-//     if (!getTasksByColor.empty) {
-//       tasks.value = [];
-//       getTasksByColor.forEach((doc) => {
-//         tasks.value.push(doc.data());
-//         loadingList.value.push(false);
-//         tasks.value[position].id = doc.id;
-//         position++;
-//       });
-//       loadingData.value = false;
-//     }
-//   } catch (error) {}
-// };
-
 const handleFilters = (selected_filter) => {
   re_render.value = false;
   re_render.value = true;
@@ -141,29 +117,6 @@ const handleFilters = (selected_filter) => {
   }
   loadTasks(true);
 };
-// const deleteAllTask = () => {
-//   loadingData.value = true;
-//   let countDelete = 0;
-//   try {
-//     tasks.value.map(async (task) => {
-//       await deleteDoc(doc(db, "tasks", task.id));
-//       countDelete++;
-//       if (countDelete === tasks.value.length) {
-//         loadingData.value = false;
-//         const { msg, config } = typeNotification(
-//           "Todas las tareas fueron eliminadas correctamente."
-//         ).success;
-//         createToast(msg, config);
-//         loadTasks();
-//       }
-//     });
-//   } catch (error) {
-//     const { msg, config } = typeNotification(
-//       "Ha ocurrido un error al eliminar todas las tareas."
-//     ).danger;
-//     createToast(msg, config);
-//   }
-// };
 </script>
 
 <template>
@@ -189,9 +142,13 @@ const handleFilters = (selected_filter) => {
         >
           <span>Agregar tarea</span>
         </button>
+        <div class="info">
+          <span>*</span>
+          Para agregar una tarea al mismo grupo(color) selecciona el color que
+          quiere y presione en "Agregar tarea"
+        </div>
       </div>
       <div class="img-background-container">
-        <!-- <img class="img-background" :src="Img" alt="Carpeta con tareas" /> -->
         <HeaderImgBackground :color="store.color" class="img-background" />
         <span
           class="img-background-blur"
@@ -217,13 +174,6 @@ const handleFilters = (selected_filter) => {
         }"
       >
       </span>
-      <!-- <img
-        v-show="filter_colors.length !== 0"
-        class="clear-filter"
-        @click="loadTasks()"
-        :src="ClearFilterIcon"
-        alt="Limpiar filtro"
-      /> -->
     </section>
     <div class="tasks-container-style">
       <div
@@ -243,50 +193,45 @@ const handleFilters = (selected_filter) => {
           <ul v-if="!loadingData">
             <template v-if="tasks.length !== 0">
               <div
-                class="list-inline"
                 v-for="(task, index) in tasks"
                 :key="task.id"
                 @click="showTaskForm(task)"
+                class="card-list-color"
+                :style="{ backgroundColor: task.color }"
               >
-                <span :style="{ backgroundColor: task.color }"></span>
-                <!-- <span
-                      class="span-before"
-                      :style="{
-                        background: `linear-gradient(90deg, transparent,
-                      ${task.color}, ${task.color}, ${task.color}, ${task.color}, transparent)`,
-                      }"
-                    ></span> -->
-                <li>{{ task.title }}</li>
-                <div class="actions-container">
-                  <Transition mode="out-in">
+                <div class="list-inline">
+                  <div class="card-content"></div>
+                  <li>{{ task.title }}</li>
+                  <div class="actions-container">
+                    <Transition mode="out-in">
+                      <img
+                        v-if="!loadingList[index]"
+                        title="Eliminar tarea"
+                        @click.stop="deleteTask(task.id, index)"
+                        class="delete-icon"
+                        :src="DeleteIcon"
+                        alt="Eliminar tarea"
+                      />
+                      <Spinner v-else />
+                    </Transition>
+                  </div>
+                  <section class="extra-info">
+                    <template v-if="task.users?.length !== 0">
+                      <img
+                        v-for="user in task.users"
+                        class="user-avatar"
+                        :src="user.profile_picture"
+                        :alt="user.name"
+                      />
+                    </template>
                     <img
-                      v-if="!loadingList[index]"
-                      title="Eliminar tarea"
-                      @click.stop="deleteTask(task.id, index)"
-                      class="delete-icon"
-                      :src="DeleteIcon"
-                      alt="Eliminar tarea"
-                    />
-                    <Spinner v-else />
-                  </Transition>
-                </div>
-                <section class="extra-info">
-                  <template v-if="task.users?.length !== 0">
-                    <img
-                      v-for="user in task.users"
+                      v-else
                       class="user-avatar"
-                      :src="user.profile_picture"
-                      :alt="user.name"
+                      :src="UsersEmptyIcon"
+                      alt="Sin usuarios asignados"
                     />
-                  </template>
-                  <img
-                    v-else
-                    class="user-avatar"
-                    :src="UsersEmptyIcon"
-                    alt="Sin usuarios asignados"
-                  />
-                </section>
-                <!-- <span class="span-after"></span> -->
+                  </section>
+                </div>
               </div>
             </template>
             <section class="empty-tasks-container" v-else>
@@ -301,13 +246,25 @@ const handleFilters = (selected_filter) => {
 </template>
 
 <style scoped>
-.list-inline span {
-  width: 5em;
-  height: 5em;
-  position: absolute;
-  filter: blur(46px);
-  top: 0;
-  left: 0;
+.info {
+  font-size: 0.8em;
+  max-width: 30em;
+  color: #616161;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  text-align: justify;
+}
+.info span {
+  color: #ff0000;
+  font-size: 1.5em;
+}
+.card-list-color {
+  border-radius: 30px 5px 30px 30px;
+  transition: 0.25s ease;
+}
+.card-list-color:hover {
+  transform: rotate(-4deg) scale(105%);
 }
 .tasks-container-style-inner {
   width: inherit;
@@ -443,7 +400,7 @@ const handleFilters = (selected_filter) => {
   border-radius: 30px 5px 30px 30px;
 }
 .list-inline:hover {
-  transform: rotate(3deg) scale(106%);
+  transform: rotate(8deg) scale(102%);
 }
 .extra-info {
   padding: 0.4em 0;
@@ -503,6 +460,7 @@ button {
 button span {
   z-index: 2;
   position: relative;
+  font-size: 1.1em;
 }
 
 button::after {
@@ -511,7 +469,7 @@ button::after {
   position: absolute;
   top: 0px;
   left: calc(-100% - 40px);
-  transition:  0.35s ease;
+  transition: 0.35s ease;
   border-right: 40px solid transparent;
   z-index: 1;
 }
@@ -606,6 +564,7 @@ button:hover::after {
     gap: 1em;
     text-align: center;
     margin-top: 1em;
+    justify-content: center;
   }
   .img-background {
     width: 16em;

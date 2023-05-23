@@ -118,13 +118,12 @@ const logout = async () => {
   align-items: center;
   gap: 1em;
   margin-right: 2em;
+  max-width: 80vw;
 }
 .logo-app-container {
   display: flex;
   align-items: center;
   gap: 0.5em;
-}
-.logo-app-container span {
 }
 .logo-app {
   width: 3em;
@@ -309,23 +308,14 @@ const logout = async () => {
   .logout-container {
     text-align: end;
   }
-  .logout-container-data{
+  .logout-container-data {
     gap: 2em;
+    margin-right: 2.5em;
   }
-  .switch{
-    top: 82px;
+  .switch {
+    top: 80px;
+    margin-right: 2.5em;
   }
-  /* .switch {
-    width: 2.3em;
-    height: 2.3em;
-  } */
-  /* .user-avatar {
-    width: 2.3em;
-    height: 2.3em;
-  } */
-  /* .logout-container-data span {
-    display: none;
-  } */
   .logo-app-container span {
     display: none;
   }

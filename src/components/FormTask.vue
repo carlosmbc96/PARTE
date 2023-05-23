@@ -14,11 +14,10 @@ import UsersCard from "./UsersCard.vue";
 const props = defineProps(["show", "taskProp", "action"]);
 const emit = defineEmits(["reload", "onCloseModal"]);
 
-const task = ref({ title: null, color: "#000000" });
+const task = ref({ title: null, color: "#00ffaa" });
 const modal = ref(null);
 const loading = ref(false);
 const store = useAuthUserStore();
-// const unsubscribe = null;
 
 watch(
   () => props.show,
@@ -28,6 +27,8 @@ watch(
     props.action === "EDIT" &&
       props.show &&
       (store.users_selected = [...task.value.users]);
+    store.filters_selected.length === 2 &&
+      (task.value.color = store.filters_selected[1]);
   }
 );
 
@@ -278,7 +279,7 @@ const selectUsers = () => {
     width: 100%;
   }
   .input-new-task {
-    width: 15em;
+    width: 90%;
   }
   .modal {
     max-width: 80vw;
