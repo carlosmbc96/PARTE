@@ -132,8 +132,8 @@ const handleFilters = (selected_filter) => {
       <div class="add-task-container">
         <h1>Aquí tienes tus pendientes...</h1>
         <h6>
-          Lorem ipsum dolor sit amet adipisicing elit. Aspernatur totam illo
-          doloribus, nobis
+          Una aplicación para compartir tareas con tus amigos, familia o quien
+          quieras...
         </h6>
         <button
           title="Agregar una nueva tarea"
