@@ -11,7 +11,6 @@ import { createToast } from "mosha-vue-toastify";
 import { onMounted, ref } from "vue";
 import DeleteIcon from "../assets/delete_icon.png";
 import EmptyIcon from "../assets/empty_icon.svg";
-import Img from "../assets/svg_tasks.svg";
 import UsersEmptyIcon from "../assets/users_empty_icon.png";
 import { db } from "../firebase";
 import typeNotification from "../notificationConfig";
@@ -24,12 +23,12 @@ const tasks = ref([]);
 const showModal = ref(false);
 const loadingData = ref(false);
 const loadingList = ref([]);
-const task = ref({ title: null, color: "#00ffaa" });
+const task = ref({ title: null, color: "#ffffff" });
 const action = ref(null);
 const filter_colors = ref([]);
-const re_render = ref(true);
 const store = useAuthUserStore();
-const showTaskForm = (taskParam = { users: [], color: "#00ffaa" }) => {
+
+const showTaskForm = (taskParam = { users: [], color: "#ffffff" }) => {
   task.value = { ...taskParam };
   action.value = taskParam.title ? "EDIT" : "CREATE";
   changeModalVisibility();
@@ -48,12 +47,12 @@ const loadTasks = (filter = false) => {
   loadingData.value = true;
   if (!filter) {
     filter_colors.value = [];
-    store.filters_selected = ["#00ffaa"];
+    store.filters_selected = [];
   }
   loadingList.value = [];
   const tasksRef = collection(db, "tasks");
   let q = null;
-  if (store.filters_selected.length !== 1) {
+  if (store.filters_selected.length > 0) {
     q = query(
       tasksRef,
       where("users", "array-contains", store.user),
@@ -106,8 +105,6 @@ const loadFilterColors = () => {
 };
 
 const handleFilters = (selected_filter) => {
-  re_render.value = false;
-  re_render.value = true;
   if (store.filters_selected.includes(selected_filter)) {
     store.filters_selected = store.filters_selected.filter(
       (filter) => filter !== selected_filter
@@ -196,41 +193,48 @@ const handleFilters = (selected_filter) => {
                 v-for="(task, index) in tasks"
                 :key="task.id"
                 @click="showTaskForm(task)"
-                class="card-list-color"
-                :style="{ backgroundColor: task.color }"
+                class="card-container"
               >
-                <div class="list-inline">
-                  <div class="card-content"></div>
-                  <li>{{ task.title }}</li>
-                  <div class="actions-container">
-                    <Transition mode="out-in">
+                <div
+                  class="card-list-color"
+                  :style="{ backgroundColor: task.color }"
+                >
+                  <div class="list-inline">
+                    <div class="card-content"></div>
+                    <li>{{ task.title }}</li>
+                    <div class="actions-container">
+                      <Transition mode="out-in">
+                        <img
+                          v-if="!loadingList[index]"
+                          title="Eliminar tarea"
+                          @click.stop="deleteTask(task.id, index)"
+                          class="delete-icon"
+                          :src="DeleteIcon"
+                          alt="Eliminar tarea"
+                        />
+                        <Spinner v-else />
+                      </Transition>
+                    </div>
+                    <section class="extra-info">
+                      <template v-if="task.users?.length !== 0">
+                        <img
+                          v-for="user in task.users.slice(0, 3)"
+                          class="user-avatar"
+                          :src="user.profile_picture"
+                          :alt="user.name"
+                        />
+                        <span class="tree-point" v-if="task.users.length > 3"
+                          >...</span
+                        >
+                      </template>
                       <img
-                        v-if="!loadingList[index]"
-                        title="Eliminar tarea"
-                        @click.stop="deleteTask(task.id, index)"
-                        class="delete-icon"
-                        :src="DeleteIcon"
-                        alt="Eliminar tarea"
-                      />
-                      <Spinner v-else />
-                    </Transition>
-                  </div>
-                  <section class="extra-info">
-                    <template v-if="task.users?.length !== 0">
-                      <img
-                        v-for="user in task.users"
+                        v-else
                         class="user-avatar"
-                        :src="user.profile_picture"
-                        :alt="user.name"
+                        :src="UsersEmptyIcon"
+                        alt="Sin usuarios asignados"
                       />
-                    </template>
-                    <img
-                      v-else
-                      class="user-avatar"
-                      :src="UsersEmptyIcon"
-                      alt="Sin usuarios asignados"
-                    />
-                  </section>
+                    </section>
+                  </div>
                 </div>
               </div>
             </template>
@@ -246,6 +250,10 @@ const handleFilters = (selected_filter) => {
 </template>
 
 <style scoped>
+.tree-point {
+  height: 3em;
+  line-height: 2.5em;
+}
 .info {
   font-size: 0.8em;
   max-width: 30em;
@@ -259,12 +267,15 @@ const handleFilters = (selected_filter) => {
   color: #ff0000;
   font-size: 1.5em;
 }
+.card-container:hover .card-list-color {
+  transform: rotate(-4deg) scale(105%);
+}
+.card-container:hover .list-inline {
+  transform: rotate(8deg) scale(102%);
+}
 .card-list-color {
   border-radius: 30px 5px 30px 30px;
   transition: 0.25s ease;
-}
-.card-list-color:hover {
-  transform: rotate(-4deg) scale(105%);
 }
 .tasks-container-style-inner {
   width: inherit;
@@ -399,12 +410,8 @@ const handleFilters = (selected_filter) => {
   background: #212121;
   border-radius: 30px 5px 30px 30px;
 }
-.list-inline:hover {
-  transform: rotate(8deg) scale(102%);
-}
 .extra-info {
   padding: 0.4em 0;
-  flex-wrap: wrap;
   height: auto;
   background-color: #313131;
   position: absolute;
@@ -553,6 +560,10 @@ button:hover::after {
   }
 }
 @media (max-width: 1000px) {
+
+  .extra-info{
+    gap: 0.6em;
+  }
   .tasks-container-style {
     width: 80vw;
   }

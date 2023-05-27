@@ -1,6 +1,6 @@
 <script setup>
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount } from "vue";
 import Login from "./components/Login.vue";
 import Spinner from "./components/Spinner.vue";
 import TasksPanel from "./components/TaskPanel.vue";

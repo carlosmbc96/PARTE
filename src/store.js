@@ -5,14 +5,14 @@ export const useAuthUserStore = defineStore("authUser", () => {
   const user = ref(null);
   const users_selected = ref([]);
   const loading = ref(false);
-  const filters_selected = ref(["00ffaa"]);
-
+  const filters_selected = ref([]);
+  
   const color = computed(() => {
     const length = filters_selected.value.length;
-    if (length === 2) {
-      return filters_selected.value[1];
-    } else if (length > 2 || length === 1) {
+    if (length === 1) {
       return filters_selected.value[0];
+    } else if (length > 1 || length === 0) {
+      return "#00ffaa";
     }
   });
 

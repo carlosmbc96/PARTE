@@ -1,6 +1,6 @@
 <script setup>
 import { collection, onSnapshot } from "firebase/firestore";
-import { onBeforeMount, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { db } from "../firebase";
 import { useAuthUserStore } from "../store";
 
@@ -9,7 +9,50 @@ const emit = defineEmits(["selected_users"]);
 const users_list = ref([]);
 const store = useAuthUserStore();
 
-onBeforeMount(() => loadUsers());
+onMounted(() => {
+  loadUsers();
+  const carousel = document.querySelector(".users-container-wrapper");
+
+  let isDragStart = false,
+    isDragging = false,
+    prevPageX,
+    prevScrollLeft,
+    positionDiff;
+
+  const dragStart = (e) => {
+    // updatating global variables value on mouse down event
+    isDragStart = true;
+    prevPageX = e.pageX || e.touches[0].pageX;
+    prevScrollLeft = carousel.scrollLeft;
+  };
+
+  const dragging = (e) => {
+    // scrolling images/carousel to left according to mouse pointer
+    if (!isDragStart) return;
+    e.preventDefault();
+    isDragging = true;
+    carousel.classList.add("dragging");
+    positionDiff = (e.pageX || e.touches[0].pageX) - prevPageX;
+    carousel.scrollLeft = prevScrollLeft - positionDiff;
+  };
+
+  const dragStop = () => {
+    isDragStart = false;
+    carousel.classList.remove("dragging");
+
+    if (!isDragging) return;
+    isDragging = false;
+  };
+
+  carousel.addEventListener("mousedown", dragStart);
+  carousel.addEventListener("touchstart", dragStart);
+
+  document.addEventListener("mousemove", dragging);
+  carousel.addEventListener("touchmove", dragging);
+
+  document.addEventListener("mouseup", dragStop);
+  carousel.addEventListener("touchend", dragStop);
+});
 
 const loadUsers = () => {
   const stop_listener = onSnapshot(collection(db, "users"), (users) => {
@@ -51,33 +94,50 @@ const objectCompare = (obj1 = {}, obj2 = {}) => {
 
 <template>
   <section class="users-container">
-    <div
-      @click="selectUser(user)"
-      class="user-card"
-      :class="{ 'user-active': isSelected(user) }"
-      v-for="user in users_list"
-      :key="user.email"
-    >
-      <img
-        class="user-avatar-select"
-        :src="user.profile_picture"
-        :alt="user.name"
-      />
+    <div class="users-container-wrapper">
+      <div
+        @click="selectUser(user)"
+        :class="{ 'user-active': isSelected(user) }"
+        class="user-card"
+        v-for="user in users_list"
+        :key="user.email"
+      >
+        <img :src="user.profile_picture" :alt="user.name" />
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.user-avatar-select {
-  width: 3rem;
-  height: 3rem;
+.user-card img {
+  width: 3em;
+  height: 3em;
   border-radius: 50%;
+}
+.users-container-wrapper.dragging {
+  cursor: grab;
+  scroll-behavior: auto;
+}
+.users-container-wrapper.dragging div {
+  pointer-events: none;
 }
 .users-container {
   display: flex;
   justify-content: center;
-  gap: 1.2em;
-  flex-wrap: wrap;
+  gap: 1em;
+  padding: 1em;
+}
+.users-container-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  cursor: pointer;
+  overflow: hidden;
+  scroll-behavior: smooth;
+  padding: 0.5em 0;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  scroll-behavior: smooth;
 }
 .user-card {
   display: flex;
@@ -86,6 +146,9 @@ const objectCompare = (obj1 = {}, obj2 = {}) => {
   cursor: pointer;
   transition: 0.25s ease;
   border-radius: 50%;
+  width: 3em;
+  height: 3em;
+  margin: 0 0.5em;
 }
 .user-card:hover {
   filter: brightness(0.5);

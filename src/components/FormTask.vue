@@ -11,10 +11,12 @@ import { useAuthUserStore } from "../store";
 import Spinner from "./Spinner.vue";
 import UsersCard from "./UsersCard.vue";
 
+
+
 const props = defineProps(["show", "taskProp", "action"]);
 const emit = defineEmits(["reload", "onCloseModal"]);
 
-const task = ref({ title: null, color: "#00ffaa" });
+const task = ref({ title: null, color: "#ffffff" });
 const modal = ref(null);
 const loading = ref(false);
 const store = useAuthUserStore();
@@ -27,8 +29,8 @@ watch(
     props.action === "EDIT" &&
       props.show &&
       (store.users_selected = [...task.value.users]);
-    store.filters_selected.length === 2 &&
-      (task.value.color = store.filters_selected[1]);
+    store.filters_selected.length === 1 &&
+      (task.value.color = store.filters_selected[0]);
   }
 );
 
@@ -44,7 +46,7 @@ const closeModal = () => {
   modal.value.close();
   store.loading = true;
   store.users_selected = [];
-  task.value.color = "#000000";
+  task.value.color = "#fff";
   task.value.title = null;
   task.value.users = [];
   emit("onCloseModal");
@@ -177,6 +179,8 @@ const selectUsers = () => {
   opacity: 0;
   transition: opacity 0.5s ease;
   box-shadow: 7px 7px 20px -15px #00ffaa;
+  max-width: 40em;
+  overflow: hidden;
 }
 .modal-open {
   opacity: 1;
@@ -194,6 +198,7 @@ const selectUsers = () => {
   background-color: transparent;
   box-shadow: 0px 4px 16px -10px black;
   position: relative;
+  color: white;
 }
 .input-new-task + span {
   bottom: 0;
@@ -226,7 +231,6 @@ const selectUsers = () => {
   justify-content: center;
   align-items: center;
   gap: 1em;
-  margin-bottom: 1em;
   margin-top: 0.6em;
   flex-wrap: wrap;
 }
@@ -263,6 +267,7 @@ const selectUsers = () => {
   align-items: center;
   gap: 0.5em;
   flex-wrap: wrap;
+  text-align: center;
 }
 .hint img {
   width: 2em;

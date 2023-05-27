@@ -1,15 +1,14 @@
 <script setup>
 import {
-  GoogleAuthProvider,
-  getAuth,
-  signInWithPopup,
-  signOut,
+GoogleAuthProvider,
+getAuth,
+signInWithPopup,
+signOut,
 } from "firebase/auth";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { createToast } from "mosha-vue-toastify";
-import LogoGoogle from "../assets/logo_google.png";
-import Logo from "../assets/LOGO-01.png";
 import { ref } from "vue";
+import LogoGoogle from "../assets/logo_google.png";
 import { app, db } from "../firebase";
 import typeNotification from "../notificationConfig";
 import { useAuthUserStore } from "../store";

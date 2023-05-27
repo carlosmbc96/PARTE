@@ -40,6 +40,7 @@ h1 {
   font-weight: 700;
 }
 h2 {
+  color: white;
   font-weight: 300;
   margin: 0 0 0.1em 0;
   text-align: center;
@@ -79,4 +80,10 @@ li {
   align-items: center;
   justify-content: center;
   margin: 0 auto;
+}
+* {
+  /* margin: 0;
+  padding: 0; */
+  /* box-sizing: border-box; */
+  /* border: 1px solid; */
 }
